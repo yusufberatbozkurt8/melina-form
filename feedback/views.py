@@ -19,7 +19,7 @@ def _is_ajax(request):
     return request.headers.get("x-requested-with") == "XMLHttpRequest"
 
 
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET", "HEAD", "POST"])
 def feedback_form(request):
     if request.method == "POST":
         form = FeedbackForm(request.POST)
