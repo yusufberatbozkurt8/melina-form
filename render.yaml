@@ -1,7 +1,7 @@
 # Render Blueprint: tek tıkla veritabanı + web servisi kurar.
 databases:
   - name: meliform-db
-    plan: free
+    plan: basic-256mb
     databaseName: meliform
     user: meliform
 
@@ -9,7 +9,7 @@ services:
   - type: web
     name: meliform
     runtime: python
-    plan: free
+    plan: starter
     buildCommand: bash build.sh
     startCommand: python -m gunicorn config.wsgi:application
     envVars:

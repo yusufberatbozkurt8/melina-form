@@ -66,9 +66,7 @@ Proje bir Render Blueprint'i (`render.yaml`) içerir:
 4. **Apply**'a basın. Render PostgreSQL veritabanını ve web servisini kurar, `build.sh`
    paketleri yükler, statik dosyaları toplar ve tabloları oluşturur.
 
-Not: Render'ın ücretsiz planında site 15 dakika ziyaret edilmezse uykuya geçer ve ilk açılış
-yaklaşık 1 dakika sürer. Ücretsiz PostgreSQL veritabanının da süresi sınırlıdır; kalıcı
-kullanım için ücretli plana geçin.
+Not: Site Render Starter (7$/ay) ve PostgreSQL Basic-256mb (6$/ay) planlarında çalışır.
 
 ## Canlıya almadan önce (Render dışı)
 
