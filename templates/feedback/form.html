@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dilek & Şikayet Formu</title>
+
+  <!-- Inter yazı tipi -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"] },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="min-h-screen bg-violet-50 font-sans text-slate-800 antialiased">
+  <main class="mx-auto w-full max-w-2xl px-4 py-10 sm:py-14">
+
+    <!-- ===== Başlık kartı (Google Forms tarzı renkli üst şerit) ===== -->
+    <section class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div class="h-2.5 bg-gradient-to-r from-violet-600 to-indigo-500"></div>
+      <div class="px-6 py-7 sm:px-8">
+        <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">Dilek & Şikayet Formu</h1>
+        <p class="mt-2 text-slate-500">
+          Görüşleriniz bizim için değerli. Formu doldurun, mesajınız doğrudan ilgili kişiye ulaşsın.
+        </p>
+        <p class="mt-4 text-sm text-rose-600">* Zorunlu alan</p>
+      </div>
+    </section>
+
+    <!-- ===== Normal (JS'siz) gönderimde Django'nun başarı mesajı ===== -->
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="mt-4 rounded-2xl bg-emerald-50 px-6 py-4 text-emerald-800 ring-1 ring-emerald-200">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- ===== Başarı kartı (AJAX gönderimden sonra gösterilir) ===== -->
+    <section id="success-card" class="mt-4 hidden rounded-2xl bg-white px-6 py-10 text-center shadow-sm ring-1 ring-slate-200 sm:px-8">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+        <svg class="h-7 w-7 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        </svg>
+      </div>
+      <h2 class="mt-5 text-xl font-semibold">Mesajınız iletildi</h2>
+      <p id="success-text" class="mt-2 text-slate-500">Mesajınız bize ulaştı. Teşekkür ederiz!</p>
+      <button id="new-entry" type="button"
+              class="mt-6 text-sm font-medium text-violet-700 hover:text-violet-900 hover:underline">
+        Yeni bir mesaj gönder
+      </button>
+    </section>
+
+    <!-- ===== Form ===== -->
+    <form id="feedback-form" method="post" action="{% url 'feedback:form' %}" novalidate class="mt-4 space-y-4">
+      {% csrf_token %}
+
+      <!-- Ad Soyad -->
+      <div class="field-card rounded-2xl bg-white px-6 py-6 shadow-sm ring-1 ring-slate-200 transition sm:px-8" data-field="full_name">
+        <label for="id_full_name" class="block font-medium">Ad Soyad <span class="text-rose-600">*</span></label>
+        <input type="text" name="full_name" id="id_full_name" maxlength="120" autocomplete="name"
+               value="{{ form.full_name.value|default_if_none:'' }}" placeholder="Adınız ve soyadınız"
+               class="mt-4 w-full border-0 border-b-2 border-slate-200 bg-transparent px-0 py-2 placeholder:text-slate-400 focus:border-violet-600 focus:outline-none focus:ring-0">
+        <p class="field-error mt-2 text-sm text-rose-600">{{ form.full_name.errors|join:" " }}</p>
+      </div>
+
+      <!-- Telefon -->
+      <div class="field-card rounded-2xl bg-white px-6 py-6 shadow-sm ring-1 ring-slate-200 transition sm:px-8" data-field="phone_number">
+        <label for="id_phone_number" class="block font-medium">Telefon Numarası <span class="text-rose-600">*</span></label>
+        <input type="tel" name="phone_number" id="id_phone_number" maxlength="20" autocomplete="tel" inputmode="tel"
+               value="{{ form.phone_number.value|default_if_none:'' }}" placeholder="0532 123 45 67"
+               class="mt-4 w-full border-0 border-b-2 border-slate-200 bg-transparent px-0 py-2 placeholder:text-slate-400 focus:border-violet-600 focus:outline-none focus:ring-0">
+        <p class="field-error mt-2 text-sm text-rose-600">{{ form.phone_number.errors|join:" " }}</p>
+      </div>
+
+      <!-- Tür (Dilek / Şikayet) -->
+      <div class="field-card rounded-2xl bg-white px-6 py-6 shadow-sm ring-1 ring-slate-200 transition sm:px-8" data-field="type">
+        <span class="block font-medium">Tür <span class="text-rose-600">*</span></span>
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {% for value, label in form.fields.type.choices %}
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-slate-200 px-4 py-3 transition hover:border-violet-300 has-[:checked]:border-violet-600 has-[:checked]:bg-violet-50">
+              <input type="radio" name="type" value="{{ value }}"
+                     class="h-4 w-4 accent-violet-600"
+                     {% if form.type.value == value %}checked{% endif %}>
+              <span>{{ label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        <p class="field-error mt-2 text-sm text-rose-600">{{ form.type.errors|join:" " }}</p>
+      </div>
+
+      <!-- Mesaj -->
+      <div class="field-card rounded-2xl bg-white px-6 py-6 shadow-sm ring-1 ring-slate-200 transition sm:px-8" data-field="message">
+        <label for="id_message" class="block font-medium">Mesajınız <span class="text-rose-600">*</span></label>
+        <textarea name="message" id="id_message" rows="5" placeholder="Dilek veya şikayetinizi detaylıca yazın…"
+                  class="mt-4 w-full resize-y border-0 border-b-2 border-slate-200 bg-transparent px-0 py-2 placeholder:text-slate-400 focus:border-violet-600 focus:outline-none focus:ring-0">{{ form.message.value|default_if_none:'' }}</textarea>
+        <p class="field-error mt-2 text-sm text-rose-600">{{ form.message.errors|join:" " }}</p>
+      </div>
+
+      <!-- Genel hata (ör. bağlantı sorunu) -->
+      <p id="form-error" class="hidden rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-rose-200"></p>
+
+      <!-- Butonlar -->
+      <div class="flex items-center justify-between pt-2">
+        <button id="submit-btn" type="submit"
+                class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-2.5 font-medium text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-violet-300 disabled:cursor-not-allowed disabled:opacity-60">
+          <svg id="spinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          <span id="submit-label">Gönder</span>
+        </button>
+        <button type="reset" class="text-sm font-medium text-violet-700 hover:text-violet-900">Formu temizle</button>
+      </div>
+    </form>
+
+    <p class="mt-10 text-center text-xs text-slate-400">Bilgileriniz yalnızca başvurunuzu değerlendirmek için kullanılır.</p>
+  </main>
+
+  <script>
+    /*
+     * Formu sayfa yenilenmeden (fetch ile) gönderir.
+     * - Başarılıysa form gizlenir, başarı kartı gösterilir.
+     * - Hata varsa her alanın altına ilgili mesaj yazılır ve kart kırmızı çerçeve alır.
+     * JavaScript kapalıysa form normal şekilde gönderilir; view bunu da destekler.
+     */
+    (function () {
+      const form = document.getElementById("feedback-form");
+      const successCard = document.getElementById("success-card");
+      const successText = document.getElementById("success-text");
+      const formError = document.getElementById("form-error");
+      const submitBtn = document.getElementById("submit-btn");
+      const spinner = document.getElementById("spinner");
+      const submitLabel = document.getElementById("submit-label");
+
+      function clearErrors() {
+        formError.classList.add("hidden");
+        form.querySelectorAll(".field-card").forEach((card) => {
+          card.classList.remove("ring-rose-400", "ring-2");
+          card.querySelector(".field-error").textContent = "";
+        });
+      }
+
+      function showErrors(errors) {
+        let firstCard = null;
+        Object.entries(errors).forEach(([field, msgs]) => {
+          const card = form.querySelector(`[data-field="${field}"]`);
+          if (!card) {
+            formError.textContent = msgs.join(" ");
+            formError.classList.remove("hidden");
+            return;
+          }
+          card.classList.add("ring-rose-400", "ring-2");
+          card.querySelector(".field-error").textContent = msgs.join(" ");
+          firstCard = firstCard || card;
+        });
+        if (firstCard) firstCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function setLoading(isLoading) {
+        submitBtn.disabled = isLoading;
+        spinner.classList.toggle("hidden", !isLoading);
+        submitLabel.textContent = isLoading ? "Gönderiliyor…" : "Gönder";
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearErrors();
+        setLoading(true);
+
+        try {
+          const response = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form), // csrfmiddlewaretoken da FormData içinde gider
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+          });
+          const data = await response.json();
+
+          if (data.ok) {
+            form.reset();
+            form.classList.add("hidden");
+            successText.textContent = data.message;
+            successCard.classList.remove("hidden");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            showErrors(data.errors || {});
+          }
+        } catch (err) {
+          formError.textContent = "Bir sorun oluştu. Lütfen bağlantınızı kontrol edip tekrar deneyin.";
+          formError.classList.remove("hidden");
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      // Bir alana yazmaya başlayınca o alanın hatasını temizle
+      form.addEventListener("input", (event) => {
+        const card = event.target.closest(".field-card");
+        if (card) {
+          card.classList.remove("ring-rose-400", "ring-2");
+          card.querySelector(".field-error").textContent = "";
+        }
+      });
+
+      form.addEventListener("reset", clearErrors);
+
+      // "Yeni bir mesaj gönder" → formu tekrar göster
+      document.getElementById("new-entry").addEventListener("click", () => {
+        successCard.classList.add("hidden");
+        form.classList.remove("hidden");
+        document.getElementById("id_full_name").focus();
+      });
+    })();
+  </script>
+</body>
+</html>
