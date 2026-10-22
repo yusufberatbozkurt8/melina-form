@@ -23,7 +23,7 @@ DEBUG = os.environ.get("DEBUG", "1") == "1"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 CSRF_TRUSTED_ORIGINS = []
 
-# Render, sitenin adresini bu değişkenle verir (ör. melina-form.onrender.com)
+# Render, sitenin adresini bu değişkenle verir (ör. meliform.onrender.com)
 RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
